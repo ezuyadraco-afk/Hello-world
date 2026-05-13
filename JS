@@ -1,0 +1,92 @@
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+app.use(express.static("public"));
+
+const fixedData = {
+    ph: 7.32,
+    turbidity: 1.24,
+    temperature: 28.6,
+    conductivity: 312,
+    tds: 156,
+    flowRate: 12.6,
+    consumption: 245.7
+};
+
+let waterLevel = 78.5;
+
+let logs = [
+    "System started successfully",
+    "Sensors connected",
+    "Monitoring active"
+];
+
+let alerts = [
+    "All systems operational"
+];
+
+app.get("/api/sensors", (req, res) => {
+
+    res.json({
+        waterLevel,
+        ...fixedData
+    });
+
+});
+
+app.get("/api/logs", (req, res) => {
+
+    res.json(logs);
+
+});
+
+app.get("/api/alerts", (req, res) => {
+
+    res.json(alerts);
+
+});
+
+setInterval(() => {
+
+    waterLevel = (60 + Math.random() * 35).toFixed(1);
+
+    logs.unshift(
+        `Water level updated: ${waterLevel}%`
+    );
+
+    if(waterLevel < 65){
+
+        alerts.unshift(
+            `Warning: Low water level (${waterLevel}%)`
+        );
+
+    }else{
+
+        alerts.unshift(
+            `Water level normal (${waterLevel}%)`
+        );
+
+    }
+
+    if(logs.length > 10){
+        logs.pop();
+    }
+
+    if(alerts.length > 10){
+        alerts.pop();
+    }
+
+}, 2000);
+
+app.listen(3000, () => {
+
+    console.log("=================================");
+    console.log("Liquid Metrics Server Running");
+    console.log("http://localhost:3000");
+    console.log("=================================");
+
+});
